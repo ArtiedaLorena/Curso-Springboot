@@ -1,20 +1,40 @@
 package com.andres.curso.springboot.di.factura.springbootdifactura.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.RequestScope;
 
 import java.util.List;
 @Component
+@RequestScope
+@JsonIgnoreProperties({"targetSource","advisors"}) //Cada vez q aparece un error lo ignora
 public class Invoice {
     @Autowired
     private Client client;
 
-    @Value("${invoice.description}")
+    @Value("${invoice.description.office}")
     private String description;
 
     @Autowired
     private List<Item> items;
+
+    //Despues de que se instancia el constructor
+    @PostConstruct
+    public void init(){
+        System.out.println("Creando el componente de la factura");
+        client.setName(client.getName().concat("Pepe"));
+        description=description.concat(" del cliente: ").concat(client.getName()).concat(client.getLastname());
+    }
+
+    //Despues de que se haya instanciado el contructor, antes de destrir el componente
+    @PreDestroy
+    public void destroy(){
+        System.out.println("Destruyendo el componente factura");
+    }
 
     public Invoice() {
     }
